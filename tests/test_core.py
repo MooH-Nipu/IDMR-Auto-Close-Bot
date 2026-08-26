@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 import httpx
 
@@ -26,6 +27,49 @@ class Client:
         response = self.responses[self.calls]
         self.calls += 1
         return response
+
+
+class TLSConfigurationTests(unittest.TestCase):
+    def test_client_uses_explicit_ca_bundle(self) -> None:
+        with patch.dict(
+            "os.environ", {"IDMR_CA_BUNDLE": "local-certs/idmr.pem"}, clear=True
+        ), patch.object(core.httpx, "Client") as client:
+            core._new_client()
+
+        client.assert_called_once_with(
+            follow_redirects=False,
+            timeout=core.DEFAULT_TIMEOUT,
+            verify="local-certs/idmr.pem",
+        )
+
+    def test_tls_verification_is_enabled_by_default(self) -> None:
+        with patch.dict("os.environ", {}, clear=True), patch.object(
+            core.httpx, "Client"
+        ) as client:
+            core._new_client()
+
+        self.assertTrue(client.call_args.kwargs["verify"])
+
+    def test_insecure_tls_requires_explicit_opt_in(self) -> None:
+        with patch.dict(
+            "os.environ", {"IDMR_TLS_INSECURE": "true"}, clear=True
+        ), patch.object(core.httpx, "Client") as client:
+            core._new_client()
+
+        self.assertFalse(client.call_args.kwargs["verify"])
+
+    def test_ca_bundle_takes_precedence_over_insecure_opt_in(self) -> None:
+        with patch.dict(
+            "os.environ",
+            {
+                "IDMR_CA_BUNDLE": "local-certs/idmr.pem",
+                "IDMR_TLS_INSECURE": "true",
+            },
+            clear=True,
+        ), patch.object(core.httpx, "Client") as client:
+            core._new_client()
+
+        self.assertEqual(client.call_args.kwargs["verify"], "local-certs/idmr.pem")
 
 
 class ServerActionRetryTests(unittest.TestCase):
