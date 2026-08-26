@@ -54,6 +54,8 @@ docker compose cp app:/tmp/idmr-config.tgz ./idmr-config.tgz
 - Dry-run is default. It fetches, evaluates, and logs candidates without mutation.
 - Live mode requires explicit checkbox and confirmation.
 - Whitelist rules are operator decisions. Bot does not second-guess alarm names.
+- Automation rules can submit `False Positive` or `Exclusion`; existing rules default to `False Positive`.
+- `Exclusion` uses the captured three-argument IDMR action payload and never enters suppress fallback.
 - Protect rules override whitelist rules when both match.
 - Close cap is mandatory: 1–500 alarms per cycle.
 - Suppress fallback is disabled by default and verifies again before use.
