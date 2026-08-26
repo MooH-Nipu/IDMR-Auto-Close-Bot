@@ -35,6 +35,8 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
+If IDMR uses a self-signed certificate, prefer `IDMR_CA_BUNDLE`. For a trusted internal-only deployment without a CA file, set `IDMR_TLS_INSECURE=true` in `.env`; this disables certificate verification only for IDMR requests.
+
 From another PC on the same trusted LAN, open `http://<BIND_IP>:<PORT>`.
 
 Default Compose binding is `127.0.0.1`; LAN access requires an explicit `BIND_IP`. Avoid `0.0.0.0` unless exposing every interface is intentional.
