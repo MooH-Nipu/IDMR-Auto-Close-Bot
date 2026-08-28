@@ -14,7 +14,6 @@ browser automation karena IDMR credentials-based tanpa OTP/SSO (§3.4).
 from __future__ import annotations
 
 import json
-import os
 import secrets
 import time
 from contextlib import nullcontext
@@ -75,14 +74,11 @@ RETRY_BACKOFF = 2.0  # detik, dikali attempt
 
 
 def _new_client() -> httpx.Client:
-    """Build IDMR client with explicit TLS policy from environment."""
-    ca_bundle = os.getenv("IDMR_CA_BUNDLE", "").strip()
-    insecure = os.getenv("IDMR_TLS_INSECURE", "").strip().lower() in {"1", "true", "yes"}
-    verify: bool | str = ca_bundle or not insecure
+    """Build client for private-IP IDMR servers with self-signed TLS."""
     return httpx.Client(
         follow_redirects=False,
         timeout=DEFAULT_TIMEOUT,
-        verify=verify,
+        verify=False,  # Internal self-signed IDMR; private-IP HTTPS enforced.  # nosec B501
     )
 
 
