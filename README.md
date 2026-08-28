@@ -19,10 +19,14 @@ cd IDMR-Auto-Close-Bot
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
+# For trusted internal self-signed IDMR, set IDMR_TLS_INSECURE=true in .env.
 python app.py
 ```
 
 Open `http://127.0.0.1:5000`.
+
+Native `python app.py` loads `.env` from the current directory. Exported environment variables take precedence. Prefer `IDMR_CA_BUNDLE`; use `IDMR_TLS_INSECURE=true` only for a trusted internal self-signed IDMR server.
 
 ## Docker / LAN review
 
